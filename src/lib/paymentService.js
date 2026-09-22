@@ -1,47 +1,46 @@
-// Live Payment Gateway Service (Stripe Checkout & LemonSqueezy Integration)
+// Stripe & LemonSqueezy Payment Gateway Integration Service
 
 export const paymentService = {
-  // Trigger real production checkout or simulation
-  async initiateCheckout(planTier, userEmail = '') {
-    const lemonProUrl = import.meta.env.VITE_LEMON_SQUEEZY_PRO_URL;
-    const lemonAgencyUrl = import.meta.env.VITE_LEMON_SQUEEZY_AGENCY_URL;
-    const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+  // Check if live Stripe / LemonSqueezy keys are configured in .env
+  isLiveGatewayConfigured() {
+    const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+    const lemonUrl = import.meta.env.VITE_LEMON_SQUEEZY_PRO_URL;
+    return Boolean(stripeKey || lemonUrl);
+  },
 
-    // 1. If LemonSqueezy checkout link is configured
-    if (planTier === 'pro' && lemonProUrl) {
-      window.location.href = `${lemonProUrl}?checkout[email]=${encodeURIComponent(userEmail)}`;
-      return true;
-    }
-    if (planTier === 'agency' && lemonAgencyUrl) {
-      window.location.href = `${lemonAgencyUrl}?checkout[email]=${encodeURIComponent(userEmail)}`;
-      return true;
+  // Trigger live checkout or demo preview checkout
+  async triggerCheckout(planId, price) {
+    const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+    const lemonUrl = import.meta.env.VITE_LEMON_SQUEEZY_PRO_URL || import.meta.env.VITE_LEMON_SQUEEZY_AGENCY_URL;
+
+    // 1. If LemonSqueezy hosted payment link is present
+    if (lemonUrl) {
+      window.location.href = lemonUrl;
+      return { success: true, mode: 'lemonsqueezy' };
     }
 
-    // 2. Stripe Checkout Integration Trigger
-    if (stripePublicKey && window.Stripe) {
+    // 2. If Stripe publishable key is present
+    if (stripeKey && window.Stripe) {
       try {
-        const stripe = window.Stripe(stripePublicKey);
-        const priceId = planTier === 'agency' 
-          ? import.meta.env.VITE_STRIPE_AGENCY_PRICE_ID 
-          : import.meta.env.VITE_STRIPE_PRO_PRICE_ID;
-
-        const { error } = await stripe.redirectToCheckout({
-          lineItems: [{ price: priceId, quantity: 1 }],
-          mode: 'subscription',
-          successUrl: `${window.location.origin}/?payment=success&tier=${planTier}`,
-          cancelUrl: `${window.location.origin}/?payment=cancelled`,
-          customerEmail: userEmail
+        const stripe = window.Stripe(stripeKey);
+        // Call your backend/Supabase Stripe checkout endpoint
+        const response = await fetch('/api/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ planId, price })
         });
-
-        if (error) {
-          console.error("Stripe Checkout Error:", error);
+        const session = await response.json();
+        if (session.id) {
+          await stripe.redirectToCheckout({ sessionId: session.id });
+          return { success: true, mode: 'stripe' };
         }
       } catch (err) {
-        console.error("Payment trigger failed:", err);
+        console.warn("Stripe backend checkout error:", err);
       }
     }
 
-    // Fallback mode for demo testing if environment keys aren't added yet
-    return false;
+    // 3. Demo Mode (Fallback for local testing before .env keys are added)
+    console.log(`[DEMO CHECKOUT]: User upgraded to ${planId.toUpperCase()} tier ($${price}).`);
+    return { success: true, mode: 'demo' };
   }
 };

@@ -1,65 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { X, Crown, Check, ShieldCheck, Clock, CreditCard } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import React, { useState } from 'react';
+import { X, Check, Zap, Crown, Shield, CreditCard, Sparkles, Tag } from 'lucide-react';
 import { paymentService } from '../lib/paymentService';
 import { soundFx } from '../utils/soundUtils';
 
 export default function PricingModal({ isOpen, onClose, onUpgradeSuccess }) {
-  const [selectedPlan, setSelectedPlan] = useState('pro');
-  const [promoCode, setPromoCode] = useState('');
+  const [billingCycle, setBillingCycle] = useState('monthly');
+  const [couponCode, setCouponCode] = useState('');
   const [discountApplied, setDiscountApplied] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(899); // 14 mins 59 secs
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const timer = setInterval(() => {
-      setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [isOpen]);
-
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-  const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-  const applyPromo = () => {
-    soundFx.playClick();
-    if (promoCode.trim().toUpperCase() === 'MONEY50' || promoCode.trim().toUpperCase() === 'PRO50') {
-      setDiscountApplied(true);
-      soundFx.playSuccess();
-    } else {
-      alert("Invalid Code. Try code: MONEY50 for 50% off!");
-    }
-  };
-
-  const handleCheckout = async () => {
-    soundFx.playCoin();
-    confetti({
-      particleCount: 120,
-      spread: 80,
-      origin: { y: 0.6 }
-    });
-
-    // Attempt real Stripe / LemonSqueezy Gateway Checkout
-    const isLiveRedirect = await paymentService.initiateCheckout(selectedPlan);
-    
-    if (!isLiveRedirect) {
-      // Local simulation success if no API keys connected yet
-      onUpgradeSuccess(selectedPlan);
-    }
-  };
+  const [loadingPlan, setLoadingPlan] = useState(null);
 
   if (!isOpen) return null;
 
+  const isLiveMode = paymentService.isLiveGatewayConfigured();
+
+  const handleApplyCoupon = (e) => {
+    e.preventDefault();
+    if (couponCode.trim().toUpperCase() === 'MONEY50') {
+      soundFx.playSuccess();
+      setDiscountApplied(true);
+    } else {
+      alert('Invalid promo code. Try "MONEY50" for 50% off!');
+    }
+  };
+
+  const handleCheckout = async (planId, rawPrice) => {
+    soundFx.playClick();
+    setLoadingPlan(planId);
+
+    const price = discountApplied ? rawPrice * 0.5 : rawPrice;
+    const result = await paymentService.triggerCheckout(planId, price);
+
+    setTimeout(() => {
+      setLoadingPlan(null);
+      onUpgradeSuccess(planId);
+    }, 1000);
+  };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div 
-        className="glass-card" 
-        onClick={(e) => e.stopPropagation()} 
+      <div
+        className="glass-card"
+        onClick={(e) => e.stopPropagation()}
         style={{
-          maxWidth: '780px',
+          maxWidth: '840px',
           width: '100%',
-          padding: '32px',
+          padding: '36px',
           position: 'relative',
           border: '1px solid var(--border-glow)',
           maxHeight: '90vh',
@@ -75,8 +60,8 @@ export default function PricingModal({ isOpen, onClose, onUpgradeSuccess }) {
             background: 'rgba(255, 255, 255, 0.08)',
             border: 'none',
             borderRadius: '50%',
-            width: '34px',
-            height: '34px',
+            width: '32px',
+            height: '32px',
             color: 'var(--text-muted)',
             cursor: 'pointer',
             display: 'flex',
@@ -87,156 +72,155 @@ export default function PricingModal({ isOpen, onClose, onUpgradeSuccess }) {
           <X size={16} />
         </button>
 
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <div className="badge badge-gold" style={{ marginBottom: '10px' }}>
-            <Clock size={14} /> SPECIAL LAUNCH OFFER ENDS IN: {formattedTime}
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+          <div className="badge badge-gold" style={{ marginBottom: '8px' }}>
+            <Crown size={14} /> UNLOCK LUMINA PRO
           </div>
-          <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '6px' }}>
-            Unlock <span className="gradient-gold-text">Lumina Pro</span> Power Suite
-          </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Supercharge your content workflow and print revenue with unlimited generations.
+          <h2 style={{ fontSize: '2.2rem', fontWeight: 800 }}>Scale Your AI Creator Empire</h2>
+          <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+            Get unlimited prompt generations, 16:9 canvas exports, and high-ticket agency proposal builders.
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }} className="responsive-grid-2">
-          {/* Pro Plan */}
-          <div
-            onClick={() => { soundFx.playClick(); setSelectedPlan('pro'); }}
-            style={{
-              background: selectedPlan === 'pro' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(7, 9, 19, 0.6)',
-              border: selectedPlan === 'pro' ? '2px solid var(--accent-gold)' : '1px solid var(--border-light)',
-              borderRadius: 'var(--radius-md)',
-              padding: '20px',
-              cursor: 'pointer',
-              position: 'relative',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <span className="badge badge-gold" style={{ position: 'absolute', top: '-10px', right: '14px', fontSize: '0.68rem' }}>
-              MOST POPULAR
-            </span>
-
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '4px' }}>Pro Creator</h3>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
-              For solo creators, YouTubers & SaaS builders.
-            </p>
-
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-code)', marginBottom: '14px' }}>
-              ${discountApplied ? '9.50' : '19'} <span style={{ fontSize: '0.85rem', color: 'var(--text-dim)', fontWeight: 500 }}>/month</span>
-            </div>
-
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.82rem', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Check size={14} color="var(--accent-emerald)" /> <strong>UNLIMITED</strong> Daily AI Credits
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Check size={14} color="var(--accent-emerald)" /> Midjourney v6 & GPT-4o Prompts
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Check size={14} color="var(--accent-emerald)" /> Viral Script & Hook Engine
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Check size={14} color="var(--accent-emerald)" /> 16:9 Canvas PNG Exports
-              </li>
-            </ul>
+        {/* Promo Code Input Bar */}
+        <div style={{
+          background: 'rgba(10, 12, 20, 0.7)',
+          padding: '12px 18px',
+          borderRadius: 'var(--radius-md)',
+          marginBottom: '24px',
+          border: '1px solid var(--border-light)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px'
+        }} className="responsive-grid-2">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-main)' }}>
+            <Tag size={16} color="var(--accent-gold)" /> Have a launch promo code? Use <strong style={{ color: 'var(--accent-gold)', fontFamily: 'var(--font-code)' }}>MONEY50</strong> for 50% OFF!
           </div>
 
-          {/* Agency Plan */}
-          <div
-            onClick={() => { soundFx.playClick(); setSelectedPlan('agency'); }}
-            style={{
-              background: selectedPlan === 'agency' ? 'rgba(0, 242, 254, 0.12)' : 'rgba(7, 9, 19, 0.6)',
-              border: selectedPlan === 'agency' ? '2px solid var(--accent-cyan)' : '1px solid var(--border-light)',
-              borderRadius: 'var(--radius-md)',
-              padding: '20px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '4px' }}>Agency Scale</h3>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
-              For growth agencies, teams & power users.
-            </p>
+          <form onSubmit={handleApplyCoupon} style={{ display: 'flex', gap: '6px' }}>
+            <input
+              type="text"
+              className="input-field"
+              placeholder="MONEY50"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+              style={{ padding: '6px 10px', fontSize: '0.8rem', width: '110px' }}
+            />
+            <button type="submit" className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.78rem' }}>
+              Apply
+            </button>
+          </form>
+        </div>
 
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-code)', marginBottom: '14px' }}>
-              ${discountApplied ? '24.50' : '49'} <span style={{ fontSize: '0.85rem', color: 'var(--text-dim)', fontWeight: 500 }}>/month</span>
+        {/* Pricing Cards Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '24px',
+          marginBottom: '24px'
+        }} className="responsive-grid-2">
+          {/* PRO PLAN */}
+          <div style={{
+            background: 'rgba(15, 17, 26, 0.9)',
+            border: '2px solid var(--accent-gold)',
+            borderRadius: 'var(--radius-md)',
+            padding: '28px',
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'relative'
+          }}>
+            <div style={{
+              position: 'absolute',
+              top: '-12px',
+              right: '20px',
+              background: 'var(--gradient-gold)',
+              color: '#08090e',
+              fontSize: '0.68rem',
+              fontWeight: 800,
+              padding: '2px 10px',
+              borderRadius: 'var(--radius-full)'
+            }}>
+              MOST POPULAR
             </div>
 
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.82rem', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Check size={14} color="var(--accent-cyan)" /> Everything in Pro Tier
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Check size={14} color="var(--accent-cyan)" /> Priority 5x Server Generation
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Check size={14} color="var(--accent-cyan)" /> 5 Team Member Seats
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Check size={14} color="var(--accent-cyan)" /> Commercial License
-              </li>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '4px' }}>Creator PRO</div>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '16px' }}>For YouTubers & Solopreneurs</div>
+
+            <div style={{ fontSize: '2.5rem', fontWeight: 900, fontFamily: 'var(--font-heading)', color: 'var(--accent-gold)', marginBottom: '16px' }}>
+              ${discountApplied ? '9.50' : '19'} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500 }}>/ month</span>
+            </div>
+
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px 0', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.85rem' }}>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={16} color="var(--accent-emerald)" /> Unlimited AI Prompt Generations</li>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={16} color="var(--accent-emerald)" /> 16:9 Canvas Thumbnail Studio Export</li>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={16} color="var(--accent-emerald)" /> Viral Script & Hook Generator</li>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={16} color="var(--accent-emerald)" /> Private Workspace Vault Storage</li>
             </ul>
+
+            <button
+              onClick={() => handleCheckout('pro', 19)}
+              disabled={loadingPlan === 'pro'}
+              className="btn-gold"
+              style={{ width: '100%', padding: '12px', justifyContent: 'center', marginTop: 'auto' }}
+            >
+              <CreditCard size={16} /> {loadingPlan === 'pro' ? 'Redirecting to Checkout...' : 'Checkout & Unlock PRO'}
+            </button>
+          </div>
+
+          {/* AGENCY PLAN */}
+          <div style={{
+            background: 'rgba(15, 17, 26, 0.7)',
+            border: '1px solid var(--border-light)',
+            borderRadius: 'var(--radius-md)',
+            padding: '28px',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '4px' }}>Agency VIP</div>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '16px' }}>For High-Ticket Agencies & Freelancers</div>
+
+            <div style={{ fontSize: '2.5rem', fontWeight: 900, fontFamily: 'var(--font-heading)', color: '#fff', marginBottom: '16px' }}>
+              ${discountApplied ? '24.50' : '49'} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500 }}>/ month</span>
+            </div>
+
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px 0', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff' }}><Check size={16} color="var(--accent-emerald)" /> Everything in PRO Plan</li>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff' }}><Check size={16} color="var(--accent-emerald)" /> $8.5k Agency Client Proposal Generator</li>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff' }}><Check size={16} color="var(--accent-emerald)" /> Paid Ads ROAS & Lead Cost Simulator</li>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff' }}><Check size={16} color="var(--accent-emerald)" /> Commercial License & Priority Support</li>
+            </ul>
+
+            <button
+              onClick={() => handleCheckout('agency', 49)}
+              disabled={loadingPlan === 'agency'}
+              className="btn-primary"
+              style={{ width: '100%', padding: '12px', justifyContent: 'center', marginTop: 'auto' }}
+            >
+              <Crown size={16} /> {loadingPlan === 'agency' ? 'Redirecting to Checkout...' : 'Unlock Agency VIP'}
+            </button>
           </div>
         </div>
 
-        {/* Coupon Input */}
+        {/* Gateway Status Badge */}
         <div style={{
-          display: 'flex',
-          gap: '10px',
-          marginBottom: '20px',
-          background: 'rgba(15, 23, 42, 0.6)',
+          fontSize: '0.75rem',
+          color: 'var(--text-dim)',
+          textAlign: 'center',
+          background: 'rgba(10, 12, 20, 0.5)',
           padding: '10px',
           borderRadius: 'var(--radius-sm)',
           border: '1px solid var(--border-light)'
         }}>
-          <input
-            type="text"
-            className="input-field"
-            value={promoCode}
-            onChange={(e) => setPromoCode(e.target.value)}
-            placeholder="Have a promo code? (Try MONEY50)"
-            style={{ padding: '8px 12px', fontSize: '0.85rem' }}
-          />
-          <button className="btn-secondary" onClick={applyPromo} style={{ whiteSpace: 'nowrap', padding: '8px 16px' }}>
-            Apply Coupon
-          </button>
-        </div>
-
-        {discountApplied && (
-          <div style={{
-            background: 'rgba(16, 185, 129, 0.15)',
-            color: 'var(--accent-emerald)',
-            padding: '8px',
-            borderRadius: 'var(--radius-sm)',
-            textAlign: 'center',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            marginBottom: '16px'
-          }}>
-            🎉 Coupon Applied! 50% Instant Discount Activated!
-          </div>
-        )}
-
-        <button
-          className="btn-gold"
-          onClick={handleCheckout}
-          style={{ width: '100%', padding: '14px', fontSize: '1rem', justifyContent: 'center' }}
-        >
-          <CreditCard size={18} /> Checkout & Unlock {selectedPlan.toUpperCase()}
-        </button>
-
-        <div style={{
-          textAlign: 'center',
-          fontSize: '0.75rem',
-          color: 'var(--text-dim)',
-          marginTop: '14px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '6px'
-        }}>
-          <ShieldCheck size={14} color="var(--accent-emerald)" /> 256-Bit SSL Encrypted • 30-Day Money-Back Guarantee
+          {isLiveMode ? (
+            <span style={{ color: 'var(--accent-emerald)' }}>
+              🔒 Live Stripe / LemonSqueezy Gateway Active. SSL Encrypted Checkout.
+            </span>
+          ) : (
+            <span>
+              ℹ️ <strong>Demo Preview Mode Active</strong>: Paste your Stripe / LemonSqueezy keys in <code>.env</code> to receive live credit card payments.
+            </span>
+          )}
         </div>
       </div>
     </div>
