@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import ValuePropShowcase from './components/ValuePropShowcase';
 import PromptArchitect from './components/PromptArchitect';
 import ViralCopyGenerator from './components/ViralCopyGenerator';
 import RevenueCalculator from './components/RevenueCalculator';
@@ -50,7 +51,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Background Animated Glow Mesh */}
+      {/* Linear Architectural Background Grid */}
       <div className="bg-mesh" />
 
       {/* Header Navbar */}
@@ -69,8 +70,14 @@ export default function App() {
         setActiveTab={setActiveTab}
       />
 
-      {/* Dynamic Tab Content Area */}
+      {/* Main Content Area */}
       <main className="container" style={{ flex: 1, paddingBottom: '40px' }}>
+        {/* Core Value Proposition Showcase */}
+        <ValuePropShowcase
+          setActiveTab={setActiveTab}
+          onOpenUpgrade={() => setIsPricingOpen(true)}
+        />
+
         {activeTab === 'architect' && (
           <PromptArchitect
             deductCredit={deductCredit}
