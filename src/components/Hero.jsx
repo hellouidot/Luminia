@@ -1,61 +1,67 @@
 import React from 'react';
 import { Sparkles, TrendingUp, DollarSign, Users, ShieldCheck, ArrowRight } from 'lucide-react';
+import { soundFx } from '../utils/soundUtils';
 
 export default function Hero({ onOpenUpgrade, setActiveTab }) {
+  const handleAction = (tabId) => {
+    soundFx.playClick();
+    setActiveTab(tabId);
+  };
+
   return (
     <section style={{
-      padding: '48px 0 32px 0',
+      padding: '40px 0 24px 0',
       position: 'relative',
       overflow: 'hidden'
     }}>
       <div className="container">
-        <div style={{
+        <div className="responsive-grid-2" style={{
           display: 'grid',
           gridTemplateColumns: '1.1fr 0.9fr',
-          gap: '40px',
+          gap: '36px',
           alignItems: 'center'
         }}>
           {/* Left Column: Headline & Messaging */}
           <div>
-            <div className="badge badge-cyan" style={{ marginBottom: '18px', padding: '6px 14px' }}>
+            <div className="badge badge-cyan" style={{ marginBottom: '16px', padding: '6px 14px' }}>
               <Sparkles size={14} /> Next-Gen Creator Monetization & AI Suite
             </div>
 
             <h1 style={{
-              fontSize: '3.2rem',
+              fontSize: 'clamp(2.2rem, 4vw, 3.4rem)',
               fontWeight: 800,
               lineHeight: 1.15,
-              marginBottom: '20px'
+              marginBottom: '16px'
             }}>
               Generate Viral Content & <span className="gradient-text">Print Revenue</span> With AI
             </h1>
 
             <p style={{
-              fontSize: '1.15rem',
+              fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
               color: 'var(--text-muted)',
-              marginBottom: '28px',
+              marginBottom: '24px',
               maxWidth: '560px',
               lineHeight: 1.6
             }}>
-              Lumina AI empowers creators, marketers, and SaaS founders to craft high-scoring prompts, viral hooks, dynamic visual thumbnails, and calculate multi-channel growth metrics.
+              Lumina AI empowers creators, marketers, and founders to craft high-scoring prompts, viral hooks, 16:9 thumbnails, and calculate multi-channel growth metrics.
             </p>
 
             {/* CTA Buttons */}
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '36px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '32px', flexWrap: 'wrap' }}>
               <button 
                 className="btn-primary" 
-                onClick={() => setActiveTab('architect')}
-                style={{ padding: '14px 28px', fontSize: '1rem' }}
+                onClick={() => handleAction('architect')}
+                style={{ padding: '12px 24px', fontSize: '0.95rem' }}
               >
-                Launch Prompt Architect <ArrowRight size={18} />
+                Launch Prompt Architect <ArrowRight size={16} />
               </button>
               
               <button 
                 className="btn-secondary" 
-                onClick={() => setActiveTab('calculator')}
-                style={{ padding: '14px 24px', fontSize: '1rem' }}
+                onClick={() => handleAction('calculator')}
+                style={{ padding: '12px 20px', fontSize: '0.95rem' }}
               >
-                <DollarSign size={18} color="var(--accent-gold)" /> Revenue Simulator
+                <DollarSign size={16} color="var(--accent-gold)" /> Revenue Simulator
               </button>
             </div>
 
@@ -63,42 +69,43 @@ export default function Hero({ onOpenUpgrade, setActiveTab }) {
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '24px',
-              paddingTop: '20px',
-              borderTop: '1px solid var(--border-light)'
+              gap: '20px',
+              paddingTop: '16px',
+              borderTop: '1px solid var(--border-light)',
+              flexWrap: 'wrap'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Users size={18} color="var(--accent-cyan)" />
+                <Users size={16} color="var(--accent-cyan)" />
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#fff', fontFamily: 'var(--font-code)' }}>42.8k+</div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>Active Creators</div>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', color: '#fff', fontFamily: 'var(--font-code)' }}>42.8k+</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Active Creators</div>
                 </div>
               </div>
 
-              <div style={{ width: '1px', height: '30px', background: 'var(--border-light)' }} />
+              <div style={{ width: '1px', height: '24px', background: 'var(--border-light)' }} className="hide-mobile" />
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <TrendingUp size={18} color="var(--accent-emerald)" />
+                <TrendingUp size={16} color="var(--accent-emerald)" />
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#fff', fontFamily: 'var(--font-code)' }}>1.4M+</div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>Prompts Generated</div>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', color: '#fff', fontFamily: 'var(--font-code)' }}>1.4M+</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Prompts Generated</div>
                 </div>
               </div>
 
-              <div style={{ width: '1px', height: '30px', background: 'var(--border-light)' }} />
+              <div style={{ width: '1px', height: '24px', background: 'var(--border-light)' }} className="hide-mobile" />
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldCheck size={18} color="var(--accent-purple)" />
+                <ShieldCheck size={16} color="var(--accent-purple)" />
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#fff', fontFamily: 'var(--font-code)' }}>99.8%</div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>Satisfaction Rate</div>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', color: '#fff', fontFamily: 'var(--font-code)' }}>99.8%</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Satisfaction</div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Right Column: Hero Graphic Display */}
-          <div className="animate-float" style={{ position: 'relative' }}>
+          <div style={{ position: 'relative' }}>
             <div style={{
               position: 'relative',
               borderRadius: 'var(--radius-lg)',
@@ -121,25 +128,25 @@ export default function Hero({ onOpenUpgrade, setActiveTab }) {
               {/* Floating Overlay Card */}
               <div style={{
                 position: 'absolute',
-                bottom: '16px',
-                left: '16px',
-                right: '16px',
-                background: 'rgba(7, 9, 19, 0.85)',
+                bottom: '12px',
+                left: '12px',
+                right: '12px',
+                background: 'rgba(7, 9, 19, 0.88)',
                 backdropFilter: 'blur(12px)',
-                padding: '14px 20px',
+                padding: '12px 16px',
                 borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border-light)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between'
+                justify: 'space-between'
               }}>
                 <div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Pro Output Sample</div>
-                  <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--accent-cyan)' }}>
-                    Midjourney v6 Photorealistic Cyberpunk Studio
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Pro Output Sample</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--accent-cyan)' }}>
+                    Midjourney v6 Cyberpunk Studio
                   </div>
                 </div>
-                <span className="badge badge-gold">Score: 98/100</span>
+                <span className="badge badge-gold" style={{ fontSize: '0.7rem' }}>Score: 98/100</span>
               </div>
             </div>
           </div>
