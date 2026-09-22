@@ -18,6 +18,7 @@ import SocialProofToast from './components/SocialProofToast';
 import Footer from './components/Footer';
 import { authService, supabase } from './lib/supabaseClient';
 import { soundFx } from './utils/soundUtils';
+import { Lock, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('architect');
@@ -55,7 +56,7 @@ export default function App() {
 
     // If unauthenticated and clicking launch, trigger sign in modal
     if (requireAuth && !userSession) {
-      setAuthRedirectReason('Create a free account or sign in to launch Lumina tools.');
+      setAuthRedirectReason('Create a free account or sign in to access this Lumina tool.');
       setIsAuthOpen(true);
     }
 
@@ -107,6 +108,9 @@ export default function App() {
     setIsPricingOpen(false);
   };
 
+  // Tools that require authentication when guest preview credits run out
+  const requiresAuthLock = !userSession && (activeTab === 'calculator' || activeTab === 'proposal' || activeTab === 'roas' || activeTab === 'studio') && credits <= 1;
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Linear Architectural Background Grid */}
@@ -143,47 +147,92 @@ export default function App() {
 
         {/* Scroll Anchor Target */}
         <div id="tool-workspace" style={{ scrollMarginTop: '90px' }}>
-          {activeTab === 'architect' && (
-            <PromptArchitect
-              deductCredit={deductCredit}
-              onOpenUpgrade={() => setIsPricingOpen(true)}
-            />
-          )}
+          {requiresAuthLock ? (
+            /* Protected Lockout Wall Component */
+            <div className="glass-card" style={{ padding: '48px 24px', textAlign: 'center', border: '1px solid var(--border-glow)' }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'var(--gradient-gold)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px auto',
+                boxShadow: 'var(--shadow-gold-glow)'
+              }}>
+                <Lock size={30} color="#08090e" />
+              </div>
 
-          {activeTab === 'copy' && (
-            <ViralCopyGenerator
-              deductCredit={deductCredit}
-            />
-          )}
+              <div className="badge badge-gold" style={{ marginBottom: '10px' }}>
+                <ShieldCheck size={14} /> PROTECTED TOOL SUITE
+              </div>
 
-          {activeTab === 'calculator' && (
-            <RevenueCalculator
-              onOpenUpgrade={() => setIsPricingOpen(true)}
-            />
-          )}
+              <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', fontWeight: 800, marginBottom: '8px' }}>
+                Create a Free Account to Unlock Tool
+              </h2>
 
-          {activeTab === 'proposal' && (
-            <ProposalGenerator
-              deductCredit={deductCredit}
-            />
-          )}
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', maxWidth: '540px', margin: '0 auto 24px auto' }}>
+                You have reached your guest preview limit. Sign up for a free Lumina account to unlock full access, save projects to your private vault, and claim 5 bonus credits!
+              </p>
 
-          {activeTab === 'roas' && (
-            <AdRoasCalculator
-              onOpenUpgrade={() => setIsPricingOpen(true)}
-            />
-          )}
+              <button
+                onClick={() => {
+                  soundFx.playClick();
+                  setAuthRedirectReason('Create a free account to unlock full access to Lumina tools.');
+                  setIsAuthOpen(true);
+                }}
+                className="btn-gold"
+                style={{ padding: '14px 28px', fontSize: '1rem' }}
+              >
+                Sign In / Create Free Account <ArrowRight size={18} />
+              </button>
+            </div>
+          ) : (
+            <>
+              {activeTab === 'architect' && (
+                <PromptArchitect
+                  deductCredit={deductCredit}
+                  onOpenUpgrade={() => setIsPricingOpen(true)}
+                />
+              )}
 
-          {activeTab === 'studio' && (
-            <ThumbnailStudio
-              deductCredit={deductCredit}
-            />
-          )}
+              {activeTab === 'copy' && (
+                <ViralCopyGenerator
+                  deductCredit={deductCredit}
+                />
+              )}
 
-          {activeTab === 'directory' && (
-            <AiDirectory
-              onOpenUpgrade={() => setIsPricingOpen(true)}
-            />
+              {activeTab === 'calculator' && (
+                <RevenueCalculator
+                  onOpenUpgrade={() => setIsPricingOpen(true)}
+                />
+              )}
+
+              {activeTab === 'proposal' && (
+                <ProposalGenerator
+                  deductCredit={deductCredit}
+                />
+              )}
+
+              {activeTab === 'roas' && (
+                <AdRoasCalculator
+                  onOpenUpgrade={() => setIsPricingOpen(true)}
+                />
+              )}
+
+              {activeTab === 'studio' && (
+                <ThumbnailStudio
+                  deductCredit={deductCredit}
+                />
+              )}
+
+              {activeTab === 'directory' && (
+                <AiDirectory
+                  onOpenUpgrade={() => setIsPricingOpen(true)}
+                />
+              )}
+            </>
           )}
         </div>
       </main>
