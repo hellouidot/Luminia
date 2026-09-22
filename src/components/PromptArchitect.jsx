@@ -273,14 +273,36 @@ export default function PromptArchitect({ deductCredit, onOpenUpgrade }) {
             </div>
           </div>
 
-          <button
-            onClick={handleCopy}
-            className="btn-secondary"
-            style={{ width: '100%', padding: '10px', justifyContent: 'center' }}
-          >
-            {copied ? <Check size={16} color="var(--accent-emerald)" /> : <Copy size={16} />}
-            {copied ? 'Copied Prompt!' : 'Copy Super Prompt'}
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={handleCopy}
+              className="btn-secondary"
+              style={{ flex: 1, padding: '10px', justifyContent: 'center' }}
+            >
+              {copied ? <Check size={16} color="var(--accent-emerald)" /> : <Copy size={16} />}
+              {copied ? 'Copied!' : 'Copy Super Prompt'}
+            </button>
+
+            <button
+              onClick={() => {
+                soundFx.playSuccess();
+                const vault = JSON.parse(localStorage.getItem('lumina_saved_vault') || '[]');
+                vault.unshift({
+                  id: Date.now().toString(),
+                  type: 'MIDJOURNEY PROMPT',
+                  content: currentPrompt,
+                  date: new Date().toISOString()
+                });
+                localStorage.setItem('lumina_saved_vault', JSON.stringify(vault));
+                alert('💾 Saved to your private Lumina Vault!');
+              }}
+              className="btn-gold"
+              style={{ padding: '10px 14px', fontSize: '0.82rem' }}
+              title="Save to My Workspace Vault"
+            >
+              💾 Save
+            </button>
+          </div>
         </div>
       </div>
     </div>

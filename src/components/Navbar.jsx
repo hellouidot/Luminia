@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Sparkles, Zap, Shield, Crown, Flame, FileText, Target, Gift, Menu, X, Key } from 'lucide-react';
+import { Sparkles, Zap, Shield, Crown, Flame, FileText, Target, Gift, Menu, X, Key, Folder } from 'lucide-react';
 import { soundFx } from '../utils/soundUtils';
 
-export default function Navbar({ activeTab, setActiveTab, credits, userTier, onOpenUpgrade, onOpenLeadMagnet, onOpenApiKeyModal }) {
+export default function Navbar({ activeTab, setActiveTab, credits, userTier, onOpenUpgrade, onOpenLeadMagnet, onOpenApiKeyModal, onOpenVault }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const tabs = [
@@ -78,7 +78,7 @@ export default function Navbar({ activeTab, setActiveTab, credits, userTier, onO
           borderRadius: 'var(--radius-full)',
           border: '1px solid var(--border-light)',
           overflowX: 'auto',
-          maxWidth: '60%'
+          maxWidth: '55%'
         }}>
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -113,7 +113,27 @@ export default function Navbar({ activeTab, setActiveTab, credits, userTier, onO
 
         {/* Right Action Bar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Custom AI API Key Button */}
+          {/* My Saved Vault Button */}
+          <button
+            onClick={() => { soundFx.playClick(); onOpenVault(); }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              background: 'rgba(157, 114, 255, 0.12)',
+              border: '1px solid rgba(157, 114, 255, 0.3)',
+              color: '#c4b5fd',
+              padding: '6px 10px',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            <Folder size={13} /> <span className="hide-mobile">Vault</span>
+          </button>
+
+          {/* AI Key Button */}
           <button
             onClick={() => { soundFx.playClick(); onOpenApiKeyModal(); }}
             style={{
@@ -131,27 +151,6 @@ export default function Navbar({ activeTab, setActiveTab, credits, userTier, onO
             title="Configure Free AI API Key"
           >
             <Key size={13} color="var(--accent-gold)" /> <span className="hide-mobile">AI Key</span>
-          </button>
-
-          {/* Free Vault Lead Magnet Button */}
-          <button
-            onClick={() => { soundFx.playClick(); onOpenLeadMagnet(); }}
-            className="hide-mobile"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'rgba(243, 208, 132, 0.12)',
-              border: '1px solid rgba(243, 208, 132, 0.3)',
-              color: 'var(--accent-gold)',
-              padding: '6px 12px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            <Gift size={13} /> Vault
           </button>
 
           {/* Credit Badge */}

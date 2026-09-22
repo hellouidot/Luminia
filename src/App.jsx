@@ -12,6 +12,7 @@ import AiDirectory from './components/AiDirectory';
 import PricingModal from './components/PricingModal';
 import LeadMagnetModal from './components/LeadMagnetModal';
 import ApiKeyModal from './components/ApiKeyModal';
+import MyVaultModal from './components/MyVaultModal';
 import SocialProofToast from './components/SocialProofToast';
 import Footer from './components/Footer';
 import { soundFx } from './utils/soundUtils';
@@ -23,6 +24,7 @@ export default function App() {
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [isLeadMagnetOpen, setIsLeadMagnetOpen] = useState(false);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [isVaultOpen, setIsVaultOpen] = useState(false);
 
   // Credit deduction logic
   const deductCredit = () => {
@@ -65,6 +67,7 @@ export default function App() {
         onOpenUpgrade={() => setIsPricingOpen(true)}
         onOpenLeadMagnet={() => setIsLeadMagnetOpen(true)}
         onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
+        onOpenVault={() => setIsVaultOpen(true)}
       />
 
       {/* Main Hero Banner */}
@@ -127,6 +130,12 @@ export default function App() {
 
       {/* Real-time Social Proof Toast Ticker */}
       <SocialProofToast onOpenUpgrade={() => setIsPricingOpen(true)} />
+
+      {/* Saved Workspace Vault Modal */}
+      <MyVaultModal
+        isOpen={isVaultOpen}
+        onClose={() => setIsVaultOpen(false)}
+      />
 
       {/* Lead Magnet Vault Modal */}
       <LeadMagnetModal
