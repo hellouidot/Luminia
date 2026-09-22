@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Flame, DollarSign, Crown, CheckCircle2, ArrowRight, Shield, Zap } from 'lucide-react';
+import { Sparkles, Flame, DollarSign, Crown, ArrowRight, Shield } from 'lucide-react';
 import { soundFx } from '../utils/soundUtils';
 
 export default function ValuePropShowcase({ setActiveTab, onOpenUpgrade }) {
@@ -117,17 +117,23 @@ export default function ValuePropShowcase({ setActiveTab, onOpenUpgrade }) {
                 {pillar.desc}
               </p>
 
-              <div style={{
-                marginTop: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: pillar.color
-              }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  soundFx.playClick();
+                  setActiveTab(pillar.id);
+                }}
+                className="btn-gold"
+                style={{
+                  marginTop: '16px',
+                  width: '100%',
+                  padding: '8px 12px',
+                  fontSize: '0.8rem',
+                  justifyContent: 'center'
+                }}
+              >
                 Launch Tool <ArrowRight size={14} />
-              </div>
+              </button>
             </div>
           );
         })}

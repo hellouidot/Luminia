@@ -48,6 +48,26 @@ export default function App() {
     }
   }, []);
 
+  // Helper to change tab & smoothly scroll down to tool workspace
+  const handleSelectTab = (tabId, requireAuth = false) => {
+    soundFx.playClick();
+    setActiveTab(tabId);
+
+    // If unauthenticated and clicking launch, trigger sign in modal
+    if (requireAuth && !userSession) {
+      setAuthRedirectReason('Create a free account or sign in to launch Lumina tools.');
+      setIsAuthOpen(true);
+    }
+
+    // Smooth scroll down to workspace element
+    setTimeout(() => {
+      const workspaceEl = document.getElementById('tool-workspace');
+      if (workspaceEl) {
+        workspaceEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
+  };
+
   // Credit deduction & URL Gatekeeper protection
   const deductCredit = () => {
     if (!userSession && credits <= 1) {
@@ -95,7 +115,7 @@ export default function App() {
       {/* Header Navbar */}
       <Navbar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(id) => handleSelectTab(id, false)}
         credits={credits}
         userTier={userTier}
         userSession={userSession}
@@ -110,59 +130,62 @@ export default function App() {
       {/* Main Hero Banner */}
       <Hero
         onOpenUpgrade={() => setIsPricingOpen(true)}
-        setActiveTab={setActiveTab}
+        setActiveTab={(id) => handleSelectTab(id, true)}
       />
 
       {/* Main Content Area */}
       <main className="container" style={{ flex: 1, paddingBottom: '40px' }}>
         {/* Core Value Proposition Showcase */}
         <ValuePropShowcase
-          setActiveTab={setActiveTab}
+          setActiveTab={(id) => handleSelectTab(id, true)}
           onOpenUpgrade={() => setIsPricingOpen(true)}
         />
 
-        {activeTab === 'architect' && (
-          <PromptArchitect
-            deductCredit={deductCredit}
-            onOpenUpgrade={() => setIsPricingOpen(true)}
-          />
-        )}
+        {/* Scroll Anchor Target */}
+        <div id="tool-workspace" style={{ scrollMarginTop: '90px' }}>
+          {activeTab === 'architect' && (
+            <PromptArchitect
+              deductCredit={deductCredit}
+              onOpenUpgrade={() => setIsPricingOpen(true)}
+            />
+          )}
 
-        {activeTab === 'copy' && (
-          <ViralCopyGenerator
-            deductCredit={deductCredit}
-          />
-        )}
+          {activeTab === 'copy' && (
+            <ViralCopyGenerator
+              deductCredit={deductCredit}
+            />
+          )}
 
-        {activeTab === 'calculator' && (
-          <RevenueCalculator
-            onOpenUpgrade={() => setIsPricingOpen(true)}
-          />
-        )}
+          {activeTab === 'calculator' && (
+            <RevenueCalculator
+              onOpenUpgrade={() => setIsPricingOpen(true)}
+            />
+          )}
 
-        {activeTab === 'proposal' && (
-          <ProposalGenerator
-            deductCredit={deductCredit}
-          />
-        )}
+          {activeTab === 'proposal' && (
+            <ProposalGenerator
+              deductCredit={deductCredit}
+            />
+          )}
 
-        {activeTab === 'roas' && (
-          <AdRoasCalculator
-            onOpenUpgrade={() => setIsPricingOpen(true)}
-          />
-        )}
+          {activeTab === 'roas' && (
+            <AdRoasCalculator
+              onOpenUpgrade={() => setIsPricingOpen(true)}
+            />
+          )}
 
-        {activeTab === 'studio' && (
-          <ThumbnailStudio
-            deductCredit={deductCredit}
-          />
-        )}
+          {activeTab === 'studio' && (
+            <ThumbnailStudio
+              deductCredit={deductCredit}
+            />
+          )}
 
-        {activeTab === 'directory' && (
-          <AiDirectory
-            onOpenUpgrade={() => setIsPricingOpen(true)}
-          />
-        )}
+          {activeTab === 'directory' && (
+            <AiDirectory
+              onOpenUpgrade={() => setIsPricingOpen(true)}
+            />
+          )}
+        </div>
       </main>
 
       {/* Real-time Social Proof Toast Ticker */}
