@@ -16,7 +16,7 @@ This document contains a complete, chronological record of every request, questi
 
 ### Request 2 & 3 & 4: GitHub Repository Setup & Authentication
 > **User Prompt**: *"now you see send the entire thing you created to this github repo git remote add origin https://github.com/hellouidot/Luminia.git git branch -M main git push -u origin main"*
-> **User Prompt**: *"hellouidot Mummadi9966@"*
+> **User Prompt**: *"hellouidot [REDACTED_PASSWORD]
 > **User Prompt**: *"ghp_[REDACTED_PERSONAL_ACCESS_TOKEN]"*
 
 - **Actions Taken**: Configured Git remote `https://github.com/hellouidot/Luminia.git` and authenticated using provided GitHub Personal Access Token. Pushed initial codebase to branch `main`.
