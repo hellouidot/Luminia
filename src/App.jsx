@@ -11,6 +11,7 @@ import ThumbnailStudio from './components/ThumbnailStudio';
 import AiDirectory from './components/AiDirectory';
 import PricingModal from './components/PricingModal';
 import LeadMagnetModal from './components/LeadMagnetModal';
+import ApiKeyModal from './components/ApiKeyModal';
 import SocialProofToast from './components/SocialProofToast';
 import Footer from './components/Footer';
 import { soundFx } from './utils/soundUtils';
@@ -21,6 +22,7 @@ export default function App() {
   const [userTier, setUserTier] = useState('FREE');
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [isLeadMagnetOpen, setIsLeadMagnetOpen] = useState(false);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
 
   // Credit deduction logic
   const deductCredit = () => {
@@ -62,6 +64,7 @@ export default function App() {
         userTier={userTier}
         onOpenUpgrade={() => setIsPricingOpen(true)}
         onOpenLeadMagnet={() => setIsLeadMagnetOpen(true)}
+        onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
       />
 
       {/* Main Hero Banner */}
@@ -130,6 +133,12 @@ export default function App() {
         isOpen={isLeadMagnetOpen}
         onClose={() => setIsLeadMagnetOpen(false)}
         onGrantBonusCredits={addCredits}
+      />
+
+      {/* Free AI API Key Configuration Modal */}
+      <ApiKeyModal
+        isOpen={isApiKeyModalOpen}
+        onClose={() => setIsApiKeyModalOpen(false)}
       />
 
       {/* Checkout / Upgrade Pro Modal */}
