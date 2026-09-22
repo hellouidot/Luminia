@@ -9,6 +9,43 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
   ? createClient(supabaseUrl, supabaseAnonKey) 
   : null;
 
+export const authService = {
+  // Sign Up with Email & Password
+  async signUp(email, password) {
+    if (!supabase) return { user: { email }, session: null, error: null };
+    return await supabase.auth.signUp({ email, password });
+  },
+
+  // Sign In with Email & Password
+  async signIn(email, password) {
+    if (!supabase) return { user: { email }, session: null, error: null };
+    return await supabase.auth.signInWithPassword({ email, password });
+  },
+
+  // OAuth Google Sign In
+  async signInWithGoogle() {
+    if (!supabase) return { error: null };
+    return await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin }
+    });
+  },
+
+  // Sign Out
+  async signOut() {
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+  },
+
+  // Get Current Session
+  async getSession() {
+    if (!supabase) return null;
+    const { data } = await supabase.auth.getSession();
+    return data.session;
+  }
+};
+
 export const databaseService = {
   // Save captured lead directly to Supabase table or LocalStorage fallback
   async saveLead(leadData) {

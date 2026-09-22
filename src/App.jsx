@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ValuePropShowcase from './components/ValuePropShowcase';
@@ -13,21 +13,49 @@ import PricingModal from './components/PricingModal';
 import LeadMagnetModal from './components/LeadMagnetModal';
 import ApiKeyModal from './components/ApiKeyModal';
 import MyVaultModal from './components/MyVaultModal';
+import AuthModal from './components/AuthModal';
 import SocialProofToast from './components/SocialProofToast';
 import Footer from './components/Footer';
+import { authService, supabase } from './lib/supabaseClient';
 import { soundFx } from './utils/soundUtils';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('architect');
   const [credits, setCredits] = useState(5);
   const [userTier, setUserTier] = useState('FREE');
+  const [userSession, setUserSession] = useState(null);
+
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [isLeadMagnetOpen, setIsLeadMagnetOpen] = useState(false);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [isVaultOpen, setIsVaultOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authRedirectReason, setAuthRedirectReason] = useState('');
 
-  // Credit deduction logic
+  // Check Supabase Auth session on load
+  useEffect(() => {
+    authService.getSession().then(session => {
+      if (session?.user) {
+        setUserSession(session.user);
+      }
+    });
+
+    if (supabase) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUserSession(session?.user || null);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, []);
+
+  // Credit deduction & URL Gatekeeper protection
   const deductCredit = () => {
+    if (!userSession && credits <= 1) {
+      setAuthRedirectReason('Create a free account to save your generated outputs and keep using Lumina AI.');
+      setIsAuthOpen(true);
+      return false;
+    }
+
     if (userTier === 'PRO' || userTier === 'AGENCY') {
       soundFx.playSuccess();
       return true;
@@ -47,6 +75,12 @@ export default function App() {
     soundFx.playCoin();
   };
 
+  const handleSignOut = async () => {
+    soundFx.playClick();
+    await authService.signOut();
+    setUserSession(null);
+  };
+
   const handleUpgradeSuccess = (planId) => {
     soundFx.playCoin();
     setUserTier(planId === 'agency' ? 'AGENCY' : 'PRO');
@@ -64,10 +98,13 @@ export default function App() {
         setActiveTab={setActiveTab}
         credits={credits}
         userTier={userTier}
+        userSession={userSession}
         onOpenUpgrade={() => setIsPricingOpen(true)}
         onOpenLeadMagnet={() => setIsLeadMagnetOpen(true)}
         onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
         onOpenVault={() => setIsVaultOpen(true)}
+        onOpenAuth={(reason) => { setAuthRedirectReason(reason); setIsAuthOpen(true); }}
+        onSignOut={handleSignOut}
       />
 
       {/* Main Hero Banner */}
@@ -130,6 +167,14 @@ export default function App() {
 
       {/* Real-time Social Proof Toast Ticker */}
       <SocialProofToast onOpenUpgrade={() => setIsPricingOpen(true)} />
+
+      {/* Supabase User Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onAuthSuccess={(user) => setUserSession(user)}
+        redirectReason={authRedirectReason}
+      />
 
       {/* Saved Workspace Vault Modal */}
       <MyVaultModal

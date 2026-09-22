@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
-import { Sparkles, Zap, Shield, Crown, Flame, FileText, Target, Gift, Menu, X, Key, Folder } from 'lucide-react';
+import { Sparkles, Zap, Shield, Crown, Flame, FileText, Target, Gift, Key, Folder, User, LogOut } from 'lucide-react';
 import { soundFx } from '../utils/soundUtils';
 
-export default function Navbar({ activeTab, setActiveTab, credits, userTier, onOpenUpgrade, onOpenLeadMagnet, onOpenApiKeyModal, onOpenVault }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+export default function Navbar({
+  activeTab,
+  setActiveTab,
+  credits,
+  userTier,
+  userSession,
+  onOpenUpgrade,
+  onOpenLeadMagnet,
+  onOpenApiKeyModal,
+  onOpenVault,
+  onOpenAuth,
+  onSignOut
+}) {
   const tabs = [
     { id: 'architect', label: 'Prompt Architect', icon: Sparkles },
     { id: 'copy', label: 'Viral Copy Engine', icon: Flame },
@@ -18,7 +28,6 @@ export default function Navbar({ activeTab, setActiveTab, credits, userTier, onO
   const handleTabClick = (id) => {
     soundFx.playClick();
     setActiveTab(id);
-    setMobileMenuOpen(false);
   };
 
   return (
@@ -78,7 +87,7 @@ export default function Navbar({ activeTab, setActiveTab, credits, userTier, onO
           borderRadius: 'var(--radius-full)',
           border: '1px solid var(--border-light)',
           overflowX: 'auto',
-          maxWidth: '55%'
+          maxWidth: '50%'
         }}>
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -113,6 +122,49 @@ export default function Navbar({ activeTab, setActiveTab, credits, userTier, onO
 
         {/* Right Action Bar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* User Auth Account Status */}
+          {userSession ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{
+                background: 'rgba(16, 185, 129, 0.12)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                color: 'var(--accent-emerald)',
+                padding: '6px 10px',
+                borderRadius: 'var(--radius-full)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <User size={12} /> {userSession.email.split('@')[0]}
+              </div>
+              <button
+                onClick={onSignOut}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}
+                title="Sign Out"
+              >
+                <LogOut size={14} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => { soundFx.playClick(); onOpenAuth('Sign in to access Lumina tools'); }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid var(--border-light)',
+                color: 'var(--text-main)',
+                padding: '6px 12px',
+                borderRadius: 'var(--radius-full)',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Sign In
+            </button>
+          )}
+
           {/* My Saved Vault Button */}
           <button
             onClick={() => { soundFx.playClick(); onOpenVault(); }}
@@ -131,26 +183,6 @@ export default function Navbar({ activeTab, setActiveTab, credits, userTier, onO
             }}
           >
             <Folder size={13} /> <span className="hide-mobile">Vault</span>
-          </button>
-
-          {/* AI Key Button */}
-          <button
-            onClick={() => { soundFx.playClick(); onOpenApiKeyModal(); }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid var(--border-light)',
-              color: 'var(--text-muted)',
-              padding: '6px 10px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '0.75rem',
-              cursor: 'pointer'
-            }}
-            title="Configure Free AI API Key"
-          >
-            <Key size={13} color="var(--accent-gold)" /> <span className="hide-mobile">AI Key</span>
           </button>
 
           {/* Credit Badge */}
